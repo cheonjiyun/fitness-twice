@@ -1,7 +1,18 @@
 export const theme = {
     color: {
         black: "#000000",
-        primary: "#4bc924",
+        white: "#FFFFFF",
+        primary: {
+            "100": "#DDFDD3",
+            "200": "#C0F9AE",
+            "300": "#8EF56E",
+            "400": "#66EE3C",
+            "500": "#48DA1A",
+            "600": "#46C020",
+            "700": "#3BA11C",
+            "800": "#2D7816",
+            "900": "#1F5110",
+        },
         grey: {
             "100": "#F3F3F3",
             "200": "#EAEAEA",
