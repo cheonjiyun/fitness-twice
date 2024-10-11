@@ -17,12 +17,14 @@ import {
 } from "../util/date";
 import { theme } from "../style/theme";
 import { StackScreenProps } from "@react-navigation/stack";
-import { NEW_DIET, TABS, TODAY } from "../constants/screenName";
+import { NEW_DIET, TODAY } from "../constants/screenName";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { RootTabParamList } from "../components/Tabs";
 import { CompositeScreenProps, useIsFocused } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
 import { DietListType } from "../type/diet";
+import { Pedometer } from "expo-sensors";
+import { Subscription } from "expo-sensors/build/Pedometer";
 
 type PropsType = CompositeScreenProps<
     BottomTabScreenProps<RootTabParamList, typeof TODAY>,
@@ -31,8 +33,9 @@ type PropsType = CompositeScreenProps<
 
 export default function Today({ navigation }: PropsType) {
     const isFocused = useIsFocused();
-    const [currentDate, setCurrentDate] = useState(new Date());
 
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentStepCount, setCurrentStepCount] = useState(0);
     const [dietList, setDietList] = useState<DietListType>([]);
 
     const saveWeight = async (weightType: WeightType, weight: number) => {
@@ -48,6 +51,28 @@ export default function Today({ navigation }: PropsType) {
                 currentDate
             )}', '${weightType}', ${newWeight});`);
     };
+
+    // 걸음수
+    const pedometer = async (): Promise<Subscription | undefined> => {
+        await Pedometer.requestPermissionsAsync(); // 권한
+        const permisionStatus = await Pedometer.getPermissionsAsync();
+
+        const isAvailable = await Pedometer.isAvailableAsync();
+
+        if (isAvailable && permisionStatus) {
+            return Pedometer.watchStepCount((result) => {
+                setCurrentStepCount(result.steps);
+            });
+        }
+    };
+    useEffect(() => {
+        let subscription: Subscription | undefined;
+        (async () => {
+            subscription = await pedometer();
+        })();
+
+        return () => subscription && subscription.remove();
+    }, []);
 
     // 식단 목록
     const refreshDietList = async () => {
@@ -104,6 +129,12 @@ export default function Today({ navigation }: PropsType) {
                     </View>
                 </View>
 
+                {/* -- 걸음수 -- */}
+                <View style={styles.pedometerContainer}>
+                    <Text>걸음수</Text>
+                    <Text>{currentStepCount}</Text>
+                </View>
+
                 {/* -- 식단 -- */}
                 <View style={styles.dietContainer}>
                     <View style={styles.dietList}>
@@ -152,6 +183,14 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
+    },
+    pedometerContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: theme.color.grey[400],
+        borderStyle: "solid",
     },
     dietContainer: {
         borderTopWidth: 1,
