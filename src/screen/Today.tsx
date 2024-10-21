@@ -25,6 +25,7 @@ import { RootStackParamList } from "../../App";
 import { DietListType } from "../type/diet";
 import { Pedometer } from "expo-sensors";
 import { Subscription } from "expo-sensors/build/Pedometer";
+import { Weights, WeightType } from "../type/weight";
 
 type PropsType = CompositeScreenProps<
     BottomTabScreenProps<RootTabParamList, typeof TODAY>,
@@ -36,8 +37,11 @@ export default function Today({ navigation }: PropsType) {
 
     const [currentDate, setCurrentDate] = useState(new Date());
     const [currentStepCount, setCurrentStepCount] = useState(0);
+    const [weightMorining, setWeightMorning] = useState("");
+    const [weightNight, setWeightNight] = useState("");
     const [dietList, setDietList] = useState<DietListType>([]);
 
+    // 몸무게
     const saveWeight = async (weightType: WeightType, weight: number) => {
         const db = await SQLite.openDatabaseAsync("fitness_twice");
 
@@ -51,6 +55,27 @@ export default function Today({ navigation }: PropsType) {
                 currentDate
             )}', '${weightType}', ${newWeight});`);
     };
+
+    const getWeight = async () => {
+        const db = await SQLite.openDatabaseAsync("fitness_twice");
+
+        const currentDateTimeStart = conversionSqlDateType(currentDate);
+        const currentDateTimeEnd = conversionSqlDateType(currentDate);
+        const weightRows: Weights[] = await db.getAllAsync(
+            `SELECT * FROM weight WHERE date BETWEEN '${currentDateTimeStart}' AND '${currentDateTimeEnd}'`
+        );
+
+        setWeightMorning(
+            weightRows.find((weight) => weight.type == "MORNING")?.weight.toString() || ""
+        );
+        setWeightNight(
+            weightRows.find((weight) => weight.type == "NIGHT")?.weight.toString() || ""
+        );
+    };
+
+    useEffect(() => {
+        getWeight();
+    }, []);
 
     // 걸음수
     const pedometer = async (): Promise<Subscription | undefined> => {
@@ -105,6 +130,8 @@ export default function Today({ navigation }: PropsType) {
                         <Text>아침</Text>
                         <View style={styles.weightInputContainer}>
                             <TextInput
+                                value={weightMorining}
+                                onChangeText={(text) => setWeightMorning(text)}
                                 placeholder="00.0"
                                 keyboardType="number-pad"
                                 onSubmitEditing={(e) =>
@@ -118,6 +145,8 @@ export default function Today({ navigation }: PropsType) {
                         <Text>저녁</Text>
                         <View style={styles.weightInputContainer}>
                             <TextInput
+                                value={weightNight}
+                                onChangeText={(text) => setWeightNight(text)}
                                 placeholder="00.0"
                                 keyboardType="number-pad"
                                 onSubmitEditing={(e) =>
