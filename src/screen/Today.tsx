@@ -41,6 +41,15 @@ export default function Today({ navigation }: PropsType) {
     const [weightNight, setWeightNight] = useState("");
     const [dietList, setDietList] = useState<DietListType>([]);
 
+    // 날짜
+    const goYesterday = () => {
+        setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() - 1)));
+    };
+
+    const goTomorrow = () => {
+        setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() + 1)));
+    };
+
     // 몸무게
     const saveWeight = async (weightType: WeightType, weight: number) => {
         const db = await SQLite.openDatabaseAsync("fitness_twice");
@@ -75,7 +84,7 @@ export default function Today({ navigation }: PropsType) {
 
     useEffect(() => {
         getWeight();
-    }, []);
+    }, [currentDate]);
 
     // 걸음수
     const pedometer = async (): Promise<Subscription | undefined> => {
@@ -114,15 +123,30 @@ export default function Today({ navigation }: PropsType) {
     // 이 화면에 fouce될때마다 데이터를 새롭게 불러옴
     useEffect(() => {
         refreshDietList();
-    }, [isFocused]);
+    }, [isFocused, currentDate]);
 
     return (
         <View>
             <ScrollView style={styles.contianer}>
                 <View style={styles.top}>
-                    <Text>어제</Text>
-                    <Text>2024.10.08</Text>
-                    <Text>내일</Text>
+                    <TouchableOpacity onPress={goYesterday} style={styles.arrowImageContainer}>
+                        <Image
+                            source={require("../../assets/icons/arrow-left.png")}
+                            style={styles.arrowImage}
+                        />
+                    </TouchableOpacity>
+
+                    <Text>
+                        {currentDate.getFullYear()}.
+                        {(currentDate.getMonth() + 1).toString().padStart(2, "0")}.
+                        {currentDate.getDate().toString().padStart(2, "0")}
+                    </Text>
+                    <TouchableOpacity onPress={goTomorrow} style={styles.arrowImageContainer}>
+                        <Image
+                            source={require("../../assets/icons/arrow-right.png")}
+                            style={styles.arrowImage}
+                        />
+                    </TouchableOpacity>
                 </View>
                 {/* -- 몸무게 -- */}
                 <View>
@@ -200,7 +224,20 @@ const styles = StyleSheet.create({
     top: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 4,
         marginBottom: 10,
+        marginHorizontal: 10,
+    },
+    arrowImageContainer: {
+        justifyContent: "center",
+        alignItems: "center",
+        width: 36,
+        height: 36,
+    },
+    arrowImage: {
+        width: 25,
+        height: 25,
     },
     weightEach: {
         flexDirection: "row",
