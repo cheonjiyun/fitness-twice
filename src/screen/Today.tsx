@@ -26,6 +26,7 @@ import { DietListType } from "../type/diet";
 import { Pedometer } from "expo-sensors";
 import { Subscription } from "expo-sensors/build/Pedometer";
 import { Weights, WeightType } from "../type/weight";
+import { MORNING, NIGHT } from "../constants/weight";
 
 type PropsType = CompositeScreenProps<
     BottomTabScreenProps<RootTabParamList, typeof TODAY>,
@@ -54,32 +55,60 @@ export default function Today({ navigation }: PropsType) {
     const saveWeight = async (weightType: WeightType, weight: number) => {
         const db = await SQLite.openDatabaseAsync("fitness_twice");
 
-        const newWeight = weight.toFixed(1);
+        updateWeight(db, weightType, weight);
+        const existingWeight = await getWeight(weightType);
+        if (existingWeight) {
+            updateWeight(db, weightType, weight);
+        } else {
+            insertWeight(db, weightType, weight);
+        }
+    };
 
+    const insertWeight = async (
+        db: SQLite.SQLiteDatabase,
+        weightType: WeightType,
+        weight: number
+    ) => {
         await db.execAsync(`
             PRAGMA journal_mode = WAL;
             
             CREATE TABLE IF NOT EXISTS weight (id INTEGER PRIMARY KEY NOT NULL, date DATE NOT NULL, type TEXT NOT NULL NOT NULL, weight INTEGER NOT NULL);
             INSERT INTO weight (date, type, weight) VALUES ('${conversionSqlDateType(
                 currentDate
-            )}', '${weightType}', ${newWeight});`);
+            )}', '${weightType}', ${weight});`);
     };
 
-    const getWeight = async () => {
+    const updateWeight = async (
+        db: SQLite.SQLiteDatabase,
+        weightType: WeightType,
+        weight: number
+    ) => {
+        await db.execAsync(`
+                PRAGMA journal_mode = WAL;
+                
+                UPDATE weight SET weight = ${weight} WHERE date = '${conversionSqlDateType(
+            currentDate
+        )}' AND type = '${weightType}';`);
+    };
+
+    const getWeight = async (weightType: WeightType): Promise<number | undefined> => {
         const db = await SQLite.openDatabaseAsync("fitness_twice");
 
         const currentDateTimeStart = conversionSqlDateType(currentDate);
         const currentDateTimeEnd = conversionSqlDateType(currentDate);
-        const weightRows: Weights[] = await db.getAllAsync(
-            `SELECT * FROM weight WHERE date BETWEEN '${currentDateTimeStart}' AND '${currentDateTimeEnd}'`
+        const weight: Weights | null = await db.getFirstSync(
+            `SELECT weight FROM weight WHERE type = '${weightType}' AND date BETWEEN '${currentDateTimeStart}' AND '${currentDateTimeEnd}'`
         );
 
-        setWeightMorning(
-            weightRows.find((weight) => weight.type == "MORNING")?.weight.toString() || ""
-        );
-        setWeightNight(
-            weightRows.find((weight) => weight.type == "NIGHT")?.weight.toString() || ""
-        );
+        return weight?.weight;
+    };
+
+    const getAndSetWeight = async () => {
+        const morning = await getWeight(MORNING);
+        const night = await getWeight(NIGHT);
+
+        setWeightMorning(morning?.toString() || "");
+        setWeightNight(night?.toString() || "");
     };
 
     // 소수점 두자리면 짜르기
@@ -88,7 +117,7 @@ export default function Today({ navigation }: PropsType) {
     };
 
     useEffect(() => {
-        getWeight();
+        getAndSetWeight();
     }, [currentDate]);
 
     // 걸음수
