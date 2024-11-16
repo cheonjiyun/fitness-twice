@@ -82,6 +82,11 @@ export default function Today({ navigation }: PropsType) {
         );
     };
 
+    // 소수점 두자리면 짜르기
+    const checkFixedOne = (weight: Number) => {
+        return !(+weight.toFixed(1) === weight);
+    };
+
     useEffect(() => {
         getWeight();
     }, [currentDate]);
@@ -155,7 +160,10 @@ export default function Today({ navigation }: PropsType) {
                         <View style={styles.weightInputContainer}>
                             <TextInput
                                 value={weightMorining}
-                                onChangeText={(text) => setWeightMorning(text)}
+                                onChangeText={(text) => {
+                                    if (checkFixedOne(Number(text))) return;
+                                    setWeightMorning(text);
+                                }}
                                 placeholder="00.0"
                                 keyboardType="number-pad"
                                 onSubmitEditing={(e) =>
@@ -170,7 +178,10 @@ export default function Today({ navigation }: PropsType) {
                         <View style={styles.weightInputContainer}>
                             <TextInput
                                 value={weightNight}
-                                onChangeText={(text) => setWeightNight(text)}
+                                onChangeText={(text) => {
+                                    if (checkFixedOne(Number(text))) return;
+                                    setWeightNight(text);
+                                }}
                                 placeholder="00.0"
                                 keyboardType="number-pad"
                                 onSubmitEditing={(e) =>
