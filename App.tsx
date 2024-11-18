@@ -22,8 +22,8 @@ import HeaderDone from "./src/components/HeaderDone";
 import Today from "./src/screen/Today";
 
 export type RootStackParamList = {
-    // [TABS]: undefined;
-    [TODAY]: undefined;
+    [TABS]: undefined;
+    // [TODAY]: undefined;
     [NEW_DIET]: undefined;
 };
 
@@ -34,9 +34,9 @@ export default function App() {
         <SQLiteProvider databaseName="weight.db">
             <StatusBar barStyle={"dark-content"} backgroundColor={theme.color.white} />
             <NavigationContainer>
-                <Stack.Navigator initialRouteName={TODAY}>
-                    {/* <Stack.Screen name={TABS} component={Tabs} options={{ headerShown: false }} /> */}
-                    <Stack.Screen name={TODAY} component={Today} options={{ headerShown: false }} />
+                <Stack.Navigator initialRouteName={TABS}>
+                    <Stack.Screen name={TABS} component={Tabs} options={{ headerShown: false }} />
+                    {/* <Stack.Screen name={TODAY} component={Today} options={{ headerShown: false }} /> */}
                     <Stack.Screen name={NEW_DIET} component={NewDiet} />
                 </Stack.Navigator>
             </NavigationContainer>
