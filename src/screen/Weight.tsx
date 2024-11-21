@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as SQLite from "expo-sqlite";
 import { conversionSqlDateType } from "../util/date";
 import { Weights } from "../type/weight";
+import { theme } from "../style/theme";
 
 const ONDAY = 1000 * 60 * 60 * 24;
 
@@ -38,11 +39,26 @@ export default function Weight() {
 
     return (
         <View style={styles.container}>
-            {currentWeights.map((weight, idx) => (
+            <View style={styles.top}>
+                <Text>저번주</Text>
+                <Text>이번주</Text>
+                <Text>다음주</Text>
+            </View>
+            <View>
+                <Text>평균</Text>
+                <Text>저번주보다 -5kg</Text>
+            </View>
+            <TouchableOpacity>
+                <Text>아침만 보기</Text>
+            </TouchableOpacity>
+            <TouchableOpacity>
+                <Text>저녁만 보기</Text>
+            </TouchableOpacity>
+            {/* {currentWeights.map((weight, idx) => (
                 <View key={`${weight.date} ${idx}`}>
                     <Text>{weight.weight}</Text>
                 </View>
-            ))}
+            ))} */}
         </View>
     );
 }
@@ -50,5 +66,13 @@ export default function Weight() {
 const styles = StyleSheet.create({
     container: {
         gap: 10,
+    },
+    top: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 4,
+        marginBottom: 10,
+        marginHorizontal: 10,
     },
 });

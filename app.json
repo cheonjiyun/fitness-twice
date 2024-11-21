@@ -12,13 +12,18 @@
             "backgroundColor": "#ffffff"
         },
         "ios": {
-            "supportsTablet": true
+            "supportsTablet": true,
+            "bundleIdentifier": "fitness-twice",
+            "buildNumber": "1.0.0"
         },
         "android": {
             "adaptiveIcon": {
                 "foregroundImage": "./assets/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
-            }
+            },
+            "package": "fitness-twice",
+            "versionCode": "1",
+            "permissions": []
         },
         "web": {
             "favicon": "./assets/favicon.png"
