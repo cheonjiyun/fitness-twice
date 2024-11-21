@@ -3,18 +3,9 @@ import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 import * as SQLite from "expo-sqlite";
 import { conversionSqlDateType } from "../util/date";
 import { Weights } from "../type/weight";
-<<<<<<< HEAD
-=======
-import {
-    LineChart,
-    BarChart,
-    PieChart,
-    ProgressChart,
-    ContributionGraph,
-    StackedBarChart,
-} from "react-native-chart-kit";
->>>>>>> c6f0d902d3664878613c042fcd8c10d82c138848
 import { theme } from "../style/theme";
+import Bar from "../components/BarChart/Bar";
+import BarChart from "../components/BarChart/BarChart";
 
 const ONDAY = 1000 * 60 * 60 * 24;
 
@@ -70,6 +61,7 @@ export default function Weight() {
                     <Text>{weight.weight}</Text>
                 </View>
             ))} */}
+            <BarChart height={200} />
         </View>
     );
 }
